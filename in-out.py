@@ -36,6 +36,29 @@ with open('example.pkl','rb') as file:
 print(x_new)
 
 
+# looping over files
+
+# no recursion
+path = os.path.dirname(os.path.realpath(__file__))
+path = os.path.join(path, '../input/')
+for file_name in os.listdir(path):
+    print(file_name)
+# with recursion -> see on stackoverflow
+
+
+# gzip files
+
+# create
+import gzip
+content = "Lots of content here"
+f = gzip.open('Onlyfinnaly.log.gz', 'wb')
+f.write(content)
+f.close()
+# read from
+import gzip
+f=gzip.open('Onlyfinnaly.log.gz','rb')
+file_content=f.read()
+print(file_content)
 
 
 # TXT
@@ -250,6 +273,8 @@ print "Current date and time using isoformat:"
 print now.isoformat()
 
 """
+source: python strptime
+
 Directive	Meaning	Notes
 %a	Locale's abbreviated weekday name.	
 %A	Locale's full weekday name.	
@@ -274,3 +299,81 @@ Directive	Meaning	Notes
 %Z	Time zone name (no characters if no time zone exists).	
 %%	A literal "%" character.
 """
+import pandas as pd
+from datetime import datetime
+date = '23/May/2017:23:45:02 +0000'
+pd.to_datetime(date, format='%d/%b/%Y:%H:%M:%S +0000') # does not support time zones????
+datetime.strptime(date, '%d/%b/%Y:%H:%M:%S %z') # time zone
+
+"""
+email
+"""
+def send_mail(send_from, send_to, subject, text,
+              server, user, pwd,
+              files=None):
+    assert isinstance(send_to, list)
+
+    msg = MIMEMultipart()
+    msg['From'] = send_from
+    msg['To'] = COMMASPACE.join(send_to)
+    msg['Date'] = formatdate(localtime=True)
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(text))
+
+    for f in files or []:
+        with open(f, "rb") as fil:
+            part = MIMEApplication(
+                fil.read(),
+                Name=basename(f)
+            )
+            part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
+            msg.attach(part)
+    
+    smtp = smtplib.SMTP(server)
+    smtp.ehlo()
+    smtp.starttls()
+    smtp.login(user, pwd)
+    smtp.sendmail(send_from, send_to, msg.as_string())
+    smtp.close()
+
+send_mail('@from',
+      ['@to'],
+      'Subject',
+      'Content',
+      'server:587',
+      'user',
+      'passwd',
+      [some_file])
+
+"""
+mysql
+"""
+import pymysql.cursors
+
+# Connect to the database
+connection = pymysql.connect(host='localhost',
+                             user='user',
+                             password='passwd',
+                             db='db',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
+
+try:
+    with connection.cursor() as cursor:
+        # Create a new record
+        sql = "INSERT INTO `users` (`email`, `password`) VALUES (%s, %s)"
+        cursor.execute(sql, ('webmaster@python.org', 'very-secret'))
+
+    # connection is not autocommit by default. So you must commit to save
+    # your changes.
+    connection.commit()
+
+    with connection.cursor() as cursor:
+        # Read a single record
+        sql = "SELECT `id`, `password` FROM `users` WHERE `email`=%s"
+        cursor.execute(sql, ('webmaster@python.org',))
+        result = cursor.fetchone()
+        print(result)
+finally:
+    connection.close()

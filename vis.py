@@ -22,6 +22,9 @@ column_names = iris.feature_names
 import pandas as pd
 df = pd.DataFrame(iris.data, columns=iris.feature_names)
 df.head()
+
+%matplotlib inline
+plt.rcParams['figure.figsize'] = [10,6]
 """
 
 
@@ -119,6 +122,28 @@ plt.hist(data)
 sns.set_style('whitegrid')
 sns.kdeplot(np.array(data), bw=0.5)
 sns.distplot(data)
+
+
+
+# Boxplot
+# Boxplot from Pandas groupby object
+df = pd.DataFrame(np.random.random(10), index=list('abaabbaabb'), columns=['x'])
+# plt
+tmp = df.groupby(df.index).x.apply(lambda x: x.values)
+plt.boxplot(tmp, labels=tmp.index)
+# sns
+sns.boxplot(df.index, df.x)
+# plt - filled in
+data = [np.random.normal(0, std, 1000) for std in range(1, 6)]
+plt.boxplot(data, notch=True, patch_artist=True)
+plt.show()
+# plt - controling the colors
+data = [np.random.normal(0, std, 1000) for std in range(1, 6)]
+box = plt.boxplot(data, notch=True, patch_artist=True)
+colors = ['cyan', 'lightblue', 'lightgreen', 'tan', 'pink']
+for patch, color in zip(box['boxes'], colors):
+    patch.set_facecolor(color)
+plt.show()
 
 
 
@@ -336,7 +361,7 @@ from sklearn.datasets import load_iris; import pandas as pd
 iris = load_iris(); data = iris.data; column_names = iris.feature_names
 df = pd.DataFrame(iris.data, columns=iris.feature_names)
 # plot
-plt.subplot(1,2,1)
+plt.subplot(1,2,1) # numrows, numcols, fignum
 plt.plot(df.filter(regex='length')) # but no legend here and same colors...
 plt.subplot(1,2,2)
 plt.plot(df.filter(regex='width'))
@@ -412,31 +437,7 @@ from plotly.graph_objs import Scatter, Figure, Layout
 plot([Scatter(x=[1, 2, 3], y=[3, 1, 6])])
 
 
-# matplotlib - adding legend
-import numpy as np
-import matplotlib.pyplot as plt
-# Example data
-a = np.arange(0,3, .02)
-b = np.arange(0,3, .02)
-c = np.exp(a)
-d = c[::-1]
-# Create plots with pre-defined labels.
-# Alternatively, you can pass labels explicitly when calling `legend`.
-fig, ax = plt.subplots()
-ax.plot(a, c, 'k--', label='Model length')
-ax.plot(a, d, 'k:', label='Data length')
-ax.plot(a, c+d, 'k', label='Total message length')
-# Now add the legend with some customizations.
-legend = ax.legend(loc='upper center', shadow=True)
-# The frame is matplotlib.patches.Rectangle instance surrounding the legend.
-frame = legend.get_frame()
-frame.set_facecolor('0.90')
-# Set the fontsize
-for label in legend.get_texts():
-    label.set_fontsize('large')
-for label in legend.get_lines():
-    label.set_linewidth(1.5)  # the legend line width
-plt.show()
+
 
 
 
@@ -483,6 +484,64 @@ surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm)#,
 # Add a color bar which maps values to colors.
 fig.colorbar(surf, shrink=0.5, aspect=5)
 plt.show()
+
+
+##################################################
+
+# matplotlib - annotations
+
+import numpy as np
+import matplotlib.pyplot as plt
+# Example data
+a = np.arange(0,3, .02)
+b = np.arange(0,3, .02)
+c = np.exp(a)
+d = c[::-1]
+# Create plots with pre-defined labels.
+# Alternatively, you can pass labels explicitly when calling `legend`.
+fig, ax = plt.subplots()
+ax.plot(a, c, 'k--', label='Model length')
+ax.plot(a, d, 'k:', label='Data length')
+ax.plot(a, c+d, 'k', label='Total message length')
+# Now add the legend with some customizations.
+legend = ax.legend(loc='upper center', shadow=True)
+# The frame is matplotlib.patches.Rectangle instance surrounding the legend.
+frame = legend.get_frame()
+frame.set_facecolor('0.90')
+# Set the fontsize
+for label in legend.get_texts():
+    label.set_fontsize('large')
+for label in legend.get_lines():
+    label.set_linewidth(1.5)  # the legend line width
+plt.show()
+
+# rotate tick labels
+g = sns.countplot(data.loan_status)
+g.set_xticklabels(g.get_xticklabels(), rotation=30)
+# Adjusting Labels
+
+# automatic rotation of labels
+df = pd.DataFrame(np.random.random(3),
+                  index=['kjfhflkjdahjheajklehjkhaekjh',
+                         'fjlhadjkhfljkhdlkjhadlkhgljkakhdka',
+                         'aalkljharlkjlakjkljkerjaaj'], columns=['x'])
+fig, ax = plt.subplots(1)
+plt.bar(range(3), df.x, tick_label=df.index)
+plt.title('Some nice plot')
+fig.autofmt_xdate()
+
+# shortening names
+def shorten(x):
+    if len(x) > 22:
+        x = x[:6] + '..' + x[-11:]
+    return x
+v_shorten = np.vectorize(shorten)
+
+
+
+
+
+
 
 
 
@@ -550,3 +609,11 @@ Legend
 
 """
 
+"""
+seaborn
+
+palette
+deep, muted, bright, pastel, dark, colorblind
+Other options:
+hls, husl, any named matplotlib palette, list of colors
+"""

@@ -14,12 +14,33 @@ import re
 re.findall('.*,', x)
 re.search('.*,', x).group()
 re.findall('[A-Za-z]*,', x)
+re.findall('[A-Za-z]+', x)
 re.findall('\. O',x)
 re.sub('.*, ','',x)
 re.sub('\..*','',x)
 re.search('(.*, )|(\..*)',x).group()
+re.search('(.*, )|(\..*)',x) # match object
 re.sub('(.*, )|(\..*)','',x) # getting just the title
 
+# fixing pandas column names
+import numpy as np
+import pandas as pd
+df = pd.DataFrame(np.random.randn(5,3), columns=['a[b','c<d','e]f'])
+features = pd.Series(df.columns)
+features = features.apply(lambda x: re.sub('[\[\]<]', '-', x))
+df.columns = features
+df
+
+# parsing URLs
+
+# URL parameters
+
+import urllib.parse as urlparse
+# url = 'http://example.com/?q=abc&p=123'
+parsed = urlparse.urlparse(url)
+params = urlparse.parse_qsl(parsed.query)
+for x,y in params:
+    print("Parameter = "+x,"Value = "+y)
 
 
 # 2016

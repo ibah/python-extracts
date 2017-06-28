@@ -157,6 +157,58 @@ sklearn.svm.LinearSVC
 
 
 """
+"""
+
+sklearn.linear_model.SGDClassifier
+
+(loss='hinge', penalty='l2', alpha=0.0001, l1_ratio=0.15, fit_intercept=True,	n_iter=5, shuffle=True, verbose=0, epsilon=0.1, n_jobs=1, random_state=None, learning_rate='optimal',	eta0=0.0, power_t=0.5, class_weight=None, warm_start=False, average=False)
+
+Linear classifiers (SVM, logistic regression, a.o.) with SGD training
+data should have zero mean and unit variance
+Much faster training than SVM
+supports multi-class classification by combining multiple binary classifiers in a “one versus all” (OVA) scheme
+
+The concrete loss function can be set via the loss parameter. SGDClassifier supports the following loss functions:
+- loss="hinge": (soft-margin) linear Support Vector Machine,
+- loss="modified_huber": smoothed hinge loss,
+- loss="log": logistic regression,
+- and all regression losses below.
+
+Using loss="log" or loss="modified_huber" enables the predict_proba method, which gives a vector of probability estimates P(y|x) per sample x.
+
+The concrete penalty can be set via the penalty parameter. SGD supports the following penalties:
+- penalty="l2": L2 norm penalty on coef_.
+- penalty="l1": L1 norm penalty on coef_.
+- penalty="elasticnet": Convex combination of L2 and L1; (1 - l1_ratio) * L2 + l1_ratio * L1.
+
+In the case of multi-class classification
+- coef_ is a two-dimensionally array of shape=[n_classes, n_features]
+- intercept_ is a one dimensional array of shape=[n_classes]
+- The i-th row of coef_ holds the weight vector of the OVA classifier for the i-th class
+- classes are indexed in ascending order (see attribute classes_).
+Note that, in principle, since they allow to create a probability model, loss="log" and loss="modified_huber" are more suitable for one-vs-all classification.
+"""
+# 1
+from sklearn import linear_model
+X = np.array([[-1, -1], [-2, -1], [1, 1], [2, 1]])
+Y = np.array([1, 1, 2, 2])
+clf = linear_model.SGDClassifier()
+clf.fit(X, Y)
+print(clf.predict([[-0.8, -1]]))
+# 2
+from sklearn.linear_model import SGDClassifier
+X = [[0., 0.], [1., 1.]]
+y = [0, 1]
+clf = SGDClassifier(loss="hinge", penalty="l2")
+clf.fit(X, y)
+clf.predict([[2., 2.]])
+clf.coef_
+clf.intercept_
+clf.decision_function([[2., 2.]])
+# 3
+clf = SGDClassifier(loss="log").fit(X, y)
+clf.predict_proba([[1., 1.]])                      
+
 # <-------------------------------------------------------------------------------------
 """
 
@@ -213,6 +265,12 @@ sklearn.neighbors.KNeighborsRegressor
 
 (n_neighbors=5, weights='uniform', algorithm='auto', leaf_size=30, p=2, metric='minkowski', metric_params=None, n_jobs=1, **kwargs)
 """
+X = [[0], [1], [2], [3]]
+y = [0, 0, 1, 1]
+from sklearn.neighbors import KNeighborsRegressor
+neigh = KNeighborsRegressor(n_neighbors=2)
+neigh.fit(X, y) 
+print(neigh.predict([[1.5]]))
 # <-------------------------------------------------------------------------------------
 
 
@@ -641,6 +699,21 @@ OneVsRestClassifier(LinearSVC(random_state=0)).fit(X, y).predict(X)
 
 
 
+"""
+
+
+>> 1.13 Feature selection
+
+
+"""
+from sklearn.datasets import load_iris
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
+iris = load_iris()
+X, y = iris.data, iris.target
+X.shape
+X_new = SelectKBest(chi2, k=2).fit_transform(X, y)
+X_new.shape
 
 
 
@@ -649,20 +722,43 @@ OneVsRestClassifier(LinearSVC(random_state=0)).fit(X, y).predict(X)
 
 
 
+"""
 
 
 
+>>> 2. Unsupervised learning
 
 
 
+"""
+# ...
+"""
 
 
+>> 2.5. Decomposing signals in components (matrix factorization problems)
 
 
+"""
+"""
+> 2.5.1. Principal component analysis (PCA)
+"""
+"""
+sklearn.decomposition.PCA
 
-
-
-
+(n_components=None, copy=True, whiten=False, svd_solver='auto', tol=0.0, iterated_power='auto', random_state=None)
+"""
+import numpy as np
+from sklearn.decomposition import PCA
+X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+pca = PCA(n_components=2)
+pca.fit(X)
+print(pca.explained_variance_ratio_) 
+pca = PCA(n_components=2, svd_solver='full')
+pca.fit(X)                 
+print(pca.explained_variance_ratio_) 
+pca = PCA(n_components=1, svd_solver='arpack')
+pca.fit(X)
+print(pca.explained_variance_ratio_) 
 
 
 
@@ -1208,7 +1304,18 @@ accuracy_score(y_true, y_pred, normalize=False)
 from sklearn.metrics import log_loss
 log_loss(["spam", "ham", "ham", "spam"],  
          [[.1, .9], [.9, .1], [.8, .2], [.35, .65]])
-
+"""
+3.3.2 -> Multiclass and more
+"""
+# Multiclass
+from sklearn import metrics
+y_true = [0, 1, 2, 0, 1, 2]
+y_pred = [0, 2, 1, 0, 0, 1]
+metrics.precision_score(y_true, y_pred, average='macro')
+metrics.recall_score(y_true, y_pred, average='micro')
+metrics.f1_score(y_true, y_pred, average='weighted')
+metrics.fbeta_score(y_true, y_pred, average='macro', beta=0.5)
+metrics.precision_recall_fscore_support(y_true, y_pred, beta=0.5, average=None)
 """
 3.3.3. Multilabel ranking metrics
 """
@@ -1443,6 +1550,36 @@ prediction = anova_svm.predict(X)
 anova_svm.score(X, y)                        
 # getting the selected features chosen by anova_filter
 anova_svm.named_steps['anova'].get_support()
+
+
+
+# Pipeline for multiclass encoding
+from sklearn.preprocessing import LabelBinarizer
+from sklearn.pipeline import make_pipeline
+
+class CustomEncoder():
+    def __init__(self):
+        self.le = LabelEncoder()
+        
+    def fit(self, y):
+        self.le.fit(y)
+        
+    def transform(self, y):
+        return self.le.transform(y).reshape(-1,1)
+
+    def fit_transform(self, X, y=None):
+        self.fit(X)
+        return self.transform(X)
+    
+    def inverse_transform(self, y):
+        return self.le.inverse_transform(y) #.reshape(-1,1)
+
+response = pd.Series(['a','b','c','a','a','b','b','c','c'])
+pipe = make_pipeline(CustomEncoder(), LabelBinarizer())
+result = pipe.fit_transform(response)
+pipe.inverse_transform(result)
+
+
 """
 
 > 4.1.2. FeatureUnion: composite feature spaces
@@ -1585,6 +1722,10 @@ from sklearn.preprocessing import OneHotEncoder
 # 1
 enc = OneHotEncoder()
 enc.fit([[0, 0, 3], [1, 1, 0], [0, 2, 1], [1, 0, 2]])  
+# variable: possible values -> dummies (positions)
+# 1: 0,1 -> 0,1
+# 2: 0,1,2 -> 2,3,4
+# 3: 0,1,2,3 -> 5,6,7,8
 enc.transform([[0, 1, 3]]).toarray()
 # 2
 enc = OneHotEncoder(n_values=[2, 3, 4])
