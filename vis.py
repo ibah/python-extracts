@@ -32,6 +32,31 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# lines, graphical elements
+# single vertical/horizontal lines
+plt.axvline(2)
+# multiple vertical/horizontal lines
+ymin, ymax = plt.ylim()
+plt.vlines([1,2,3], ymin, ymax, linestyle='dashed')
+
+# markers
+X = np.array([[1, 2], [1, 4], [1, 0],
+              [4, 2], [4, 4], [4, 0]])
+labels = [0,0,0,1,1,1]; centers = np.array([[1,2],[4,2]])
+plt.scatter(*X.T)
+col_dict = {0: 'r', 1:'g'}
+col = [col_dict[l] for l in labels]
+plt.scatter(*X.T, s=64, color=col)
+plt.scatter(*centers.T, s=128, c=['r','g']) # marker size
+plt.scatter(*centers.T, s=256, marker='+', c=['r','g']) # marker type
+plt.scatter(*centers.T, s=512, marker=(4,2,45), c=['r','g']) # custom marker type
+from matplotlib.markers import MarkerStyle # apparently useless
+plt.scatter(*centers.T, s=1024, marker=MarkerStyle('o','top'), c=['r','g']) # custom marker type
+# one plot
+plt.scatter(*X.T, s=64, color=col)
+plt.scatter(*centers.T, s=512, marker='+', c=['r','g'])
+
+
 
 # scatter plot
 N = 50
@@ -44,8 +69,8 @@ plt.show()
 
 
 # histogrtam, density plot
-https://plot.ly/matplotlib/histograms/
-http://seaborn.pydata.org/tutorial/distributions.html
+# https://plot.ly/matplotlib/histograms/
+# http://seaborn.pydata.org/tutorial/distributions.html
 x = np.random.normal(size=100)
 plt.hist(x)
 sns.kdeplot(x)
@@ -53,7 +78,12 @@ sns.distplot(x)
 sns.distplot(x, kde=False, rug=True)
 sns.distplot(x, bins=20, kde=False, rug=True)
 
-
+# histogram of Pandas timedelta
+# http://www.datasciencebytes.com/bytes/2015/05/16/pandas-timedelta-histograms-unit-conversion-and-overflow-danger/
+tds = pd.Series(pd.to_timedelta(np.arange(10,20), unit='d'))
+tds
+tds.hist() # error
+tds.astype('timedelta64[D]').hist()
 
 
 # categorical data
@@ -112,6 +142,12 @@ plt.show()
 
 
 
+# Sparsity plot
+import matplotlib.pyplot as plt
+from scipy.stats import bernoulli
+x = bernoulli.rvs(.5, size=(2,3))
+print(x)
+plt.spy(x) # plots the sparsity pattern of the 2-D array Z
 
 
 
