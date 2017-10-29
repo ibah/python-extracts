@@ -35,10 +35,169 @@ from sklearn import linear_model
 reg = linear_model.LinearRegression()
 reg.fit ([[0, 0], [1, 1], [2, 2]], [0, 1, 2])
 reg.coef_
+"""
+
+> 1.1.2. Ridge Regression
+
+sklearn.linear_model.Ridge
+	(alpha=1.0, fit_intercept=True, normalize=False, copy_X=True, max_iter=None, tol=0.001, solver=’auto’, random_state=None)
+Regularized linear regression (L2-norm).
+"""
+from sklearn import linear_model
+reg = linear_model.Ridge (alpha = .5)
+reg.fit ([[0, 0], [0, 0], [1, 1]], [0, .1, 1]) 
+reg.coef_
+reg.intercept_
+"""
+sklearn.linear_model.RidgeCV
+	(alphas=(0.1, 1.0, 10.0), fit_intercept=True, normalize=False, scoring=None, cv=None, gcv_mode=None, store_cv_values=False)
+	# Generalized Cross-Validation for alpha = a form of efficient LOOCV
+"""
+from sklearn import linear_model
+reg = linear_model.RidgeCV(alphas=(0.1,0.5,1,10), store_cv_values=True)
+reg.fit ([[0, 0], [0, 0], [1, 1]], [0, .1, 1])
+reg.cv_values_  # rows are LOO folds, columns are alphas
+reg.cv_values_.mean(axis=0) # the last alpha (10) has the highest CV score
+reg.alpha_ # and alpha=10 is chosen
+reg.coef_
+reg.intercept_
+"""
+
+> 1.1.3 Lasso
+
+sklearn.linear_model.Lasso
+	(alpha=1.0, fit_intercept=True, normalize=False, precompute=False, copy_X=True, max_iter=1000, tol=0.0001, warm_start=False, positive=False, random_state=None, selection=’cyclic’)
+
+Linear Model trained with L1 prior as regularizer
+uses coordinate descent as the algorithm to fit the coefficients. See Least Angle Regression for another implementation
+"""
+from sklearn import linear_model
+reg = linear_model.Lasso(alpha = 0.1)
+reg.fit([[0, 0], [1, 1]], [0, 1])
+reg.predict([[1, 1]])
+reg.n_iter_
+"""
+sklearn.linear_model.lasso_path
+
+	(X, y, eps=0.001, n_alphas=100, alphas=None, precompute=’auto’, Xy=None, copy_X=True, coef_init=None, verbose=False,	return_n_iter=False, positive=False, **params)
+    
+Paths of coefficients over a range of alphas.
+"""
+"""
+Lasso: selecting value of alpha:
+    LassoCV - CV
+    LassoLarsCV - Least Angle Regression algorithm for CV
+    LassoLarsIC - information critiria (AIC or BIC)
+The equivalence between alpha and the regularization parameter of SVM, C is given by alpha = 1 / C
+"""
+# see Lasso Model Selection:
+# http://scikit-learn.org/stable/auto_examples/linear_model/plot_lasso_model_selection.html
+# done
+"""
+
+> 1.1.4. Multi-task Lasso
+
+sklearn.linear_model.MultiTaskLasso
+	(alpha=1.0, fit_intercept=True, normalize=False, copy_X=True, max_iter=1000, tol=0.0001, warm_start=False,
+	random_state=None, selection=’cyclic’)
+
+estimates sparse coefficients for multiple regression problems jointly: y is a 2D array, of shape (n_samples, n_tasks). The constraint is that the selected features are the same for all the regression problems, also called tasks
+L1/L2 mixed-norm as regularizer
+X argument of the fit method should be directly passed as a Fortran-contiguous numpy array.
+"""
+from sklearn import linear_model
+clf = linear_model.MultiTaskLasso(alpha=0.1)
+clf.fit([[0,0], [1, 1], [2, 2]], [[0, 0], [1, 1], [2, 2]])
+print(clf.coef_)
+print(clf.intercept_)
+clf.n_iter_
+# see multi task lasso
+# http://scikit-learn.org/stable/auto_examples/linear_model/plot_multi_task_lasso_support.html
+# done
+"""
+
+> 1.1.5. Elastic Net
+
+sklearn.linear_model.ElasticNet
+
+(alpha=1.0, l1_ratio=0.5, fit_intercept=True, normalize=False, precompute=False, max_iter=1000, copy_X=True, tol=0.0001, warm_start=False, positive=False, random_state=None, selection=’cyclic’)
+
+Linear regression with combined L1 and L2 priors as regularizer.
+Learning a sparse model where:
+    few of the weights are non-zero like Lasso, while still
+    maintaining the regularization properties of Ridge (inherit some of Ridge’s stability under rotation)
+We control the convex combination of L1 and L2 using the l1_ratio parameter.
+Useful when there are multiple features which are correlated with one another. Lasso is likely to pick one of these at random, while elastic-net is likely to pick both.
+"""
+from sklearn.linear_model import ElasticNet
+from sklearn.datasets import make_regression
+X, y = make_regression(n_features=2, random_state=0)
+regr = ElasticNet(random_state=0)
+regr.fit(X, y)
+print(regr.coef_) 
+print(regr.intercept_) 
+print(regr.predict([[0, 0]]))
+# see Lasso and Elastic Net
+# http://scikit-learn.org/stable/auto_examples/linear_model/plot_lasso_coordinate_descent_path.html
+# done
+"""
+sklearn.linear_model.enet_path
+
+Path of coefficients.
+"""
+"""
+sklearn.linear_model.ElasticNetCV
+
+	(l1_ratio=0.5, eps=0.001, n_alphas=100, alphas=None, fit_intercept=True, normalize=False, precompute=’auto’,	max_iter=1000, tol=0.0001, cv=None, copy_X=True, verbose=0, n_jobs=1, positive=False, random_state=None, selection=’cyclic’)
+	# set the parameters alpha (\alpha) and l1_ratio (\rho) by cross-validation
+"""
+"""
+
+> 1.1.7. Least Angle Regression
+
+sklearn.linear_model.Lars
+
+	(fit_intercept=True, verbose=False, normalize=True, precompute=’auto’, n_nonzero_coefs=500, eps=2.2204460492503131e-16, copy_X=True, fit_path=True, positive=False)
+
+regression algorithm for high-dimensional data - efficient, but sensitive to the effects of noise.
+At each step, it finds the predictor most correlated with the response. When there are multiple predictors having equal correlation, instead of continuing along the same predictor, it proceeds in a direction equiangular between the predictors.
+"""
+from sklearn import linear_model
+reg = linear_model.Lars(n_nonzero_coefs=1)
+reg.fit([[-1, 1], [0, 0], [1, 1]], [-1.1111, 0, -1.1111])
+print(reg.coef_) 
+reg.intercept_
+"""
+sklearn.linear_model.lars_path
+
+	(X, y, Xy=None, Gram=None, max_iter=500, alpha_min=0, method=’lar’, copy_X=True, eps=2.2204460492503131e-16, copy_Gram=True, verbose=0, return_path=True, return_n_iter=False, positive=False)
+
+Computes Lasso Path along the regularization parameter using the LARS algorithm
+"""
+# see
+# http://scikit-learn.org/stable/auto_examples/linear_model/plot_lasso_lars.html
+# done
+"""
+> 1.1.8. LARS Lasso
+
+sklearn.linear_model.LassoLars
+	(alpha=1.0, fit_intercept=True, verbose=False, normalize=True, precompute=’auto’, max_iter=500, eps=2.2204460492503131e-16, copy_X=True, fit_path=True, positive=False)
+a lasso model implemented using the LARS algorithm
+exact solution
+full path
+"""
+from sklearn import linear_model
+reg = linear_model.LassoLars(alpha=0.01)
+reg.fit([[-1, 1], [0, 0], [1, 1]], [-1, 0, -1])
+print(reg.coef_)
+reg.intercept_
+
+
 
 
 
 # <--------------------------------------------------------------------------------------------------------
+
 """
 
 > 1.1.11. Logistic regression
@@ -732,6 +891,39 @@ X_new.shape
 
 """
 # ...
+"""
+
+
+>> 2.3 Clustering
+
+
+"""
+# Comparing different clustering algorithms on toy datasets
+# http://scikit-learn.org/stable/auto_examples/cluster/plot_cluster_comparison.html
+"""
+> 2.3.2. K-means
+sklearn.cluster.KMeans
+	(n_clusters=8, init=’k-means++’, n_init=10, max_iter=300, tol=0.0001, precompute_distances=’auto’, verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm=’auto’)
+
+"""
+from sklearn.cluster import KMeans
+import numpy as np
+X = np.array([[1, 2], [1, 4], [1, 0],
+              [4, 2], [4, 4], [4, 0]])
+X = np.array([[1.5, 2], [1, 3], [1, 1],
+              [3.5, 2], [4, 4], [4, 0]])
+plt.scatter(*X.T)
+kmeans = KMeans(n_clusters=2, random_state=0).fit(X)
+kmeans.labels_
+kmeans.predict([[0, 0], [4, 4]])
+kmeans.cluster_centers_
+# plot the results
+col_dict = {0: 'r', 1:'g'}
+col = [col_dict[l] for l in kmeans.labels_]
+plt.scatter(*X.T, s=64, color=col)
+plt.scatter(*kmeans.cluster_centers_.T, s=512, marker='+', c=['r','g'])
+
+
 """
 
 
