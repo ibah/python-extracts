@@ -163,6 +163,22 @@ csv_file.close()
 # with
 # ditto
 
+"""
+Excel
+
+special module available
+below tools form Pandas
+"""
+# read
+df0 = pd.read_excel('input.xlsx', 'Sheet1')
+# write
+writer = pd.ExcelWriter('output.xlsx')
+df1.to_excel(writer,'Sheet1')
+df2.to_excel(writer,'Sheet2')
+writer.save()
+
+
+
 
 """
 
@@ -305,8 +321,11 @@ date = '23/May/2017:23:45:02 +0000'
 pd.to_datetime(date, format='%d/%b/%Y:%H:%M:%S +0000') # does not support time zones????
 datetime.strptime(date, '%d/%b/%Y:%H:%M:%S %z') # time zone
 
+
 """
+
 email
+
 """
 def send_mail(send_from, send_to, subject, text,
               server, user, pwd,
@@ -346,8 +365,11 @@ send_mail('@from',
       'passwd',
       [some_file])
 
+
 """
+
 mysql
+
 """
 import pymysql.cursors
 
@@ -377,3 +399,44 @@ try:
         print(result)
 finally:
     connection.close()
+
+"""
+
+ORACLE SQL
+
+"""
+
+import cx_Oracle as cx
+con = cx.connect('user/password@server')
+print(con.version)
+cur = con.cursor()
+cur.execute('SELECT * FROM v$version')
+# obtaining results
+header = [x[0] for x in cur.description]
+for result in cur:
+    print(result)
+row = cur.fetchone()
+print(row)
+res = cur.fetchmany(numRows=3)
+print(res)
+res = cur.fetchall()
+print(res)
+# closing
+cur.close()
+con.close()
+
+
+"""
+
+Error Handling
+
+"""
+
+# catch-all error handling
+import sys
+try:
+  untrusted.execute()
+except: # catch *all* exceptions
+  e = sys.exc_info()#[0]
+  print("Error: %s" % e)
+
