@@ -16,3 +16,21 @@ import matplotlib.pyplot as plt
 plt.plot(x, y, 'o') # original data points
 plt.plot(xvals, yinterp, '-x') # interpolated data points
 plt.show()
+
+# sparce matrices
+from scipy.sparse import csc_matrix
+a = csc_matrix([[1,0,0,0],[0,0,10,11],[0,0,0,99]])
+a
+# print whole array
+print(a) # sparse matrix
+a.todense() # dense matrix
+a.toarray() # numpy array
+# print a row
+print(a[1,:])
+a.todense()[1,:]
+a.toarray()[1,:]
+# print a column
+print(a[:,2])
+a.todense()[:,2]
+a.toarray()[:,2][:,np.newaxis] # necessary to preserve the number of dimensions
+
