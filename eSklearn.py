@@ -7,6 +7,22 @@ Created on Fri Mar 17 12:37:49 2017
 
 import numpy as np
 
+# data
+X, y = [[-1, 0, 2, -2], [0, 0, 3, 5], [1, 1, 4, -2],[-2,-3,1,1]], [-1, 0, -1,0]
+
+# sparse data
+from sklearn.datasets import make_sparse_coded_signal
+n_components, n_features = 512, 100
+n_nonzero_coefs = 17
+# generate the data
+###################
+# y = Xw
+# |x|_0 = n_nonzero_coefs
+y, X, w = make_sparse_coded_signal(n_samples=1,
+                                   n_components=n_components,
+                                   n_features=n_features,
+                                   n_nonzero_coefs=n_nonzero_coefs,
+                                   random_state=0)
 """
 
 
@@ -192,10 +208,78 @@ reg.fit([[-1, 1], [0, 0], [1, 1]], [-1, 0, -1])
 print(reg.coef_)
 reg.intercept_
 
+# see an example for more
 
+"""
+> 1.1.9. Orthogonal Matching Pursuit (OMP)
 
+sklearn.linear_model.OrthogonalMatchingPursuit
+	(n_nonzero_coefs=None, tol=None, fit_intercept=True, normalize=True, precompute=’auto’)
+    
+sklearn.linear_model.orthogonal_mp
+	(X, y, n_nonzero_coefs=None, tol=None, precompute=False, copy_X=True, return_path=False, return_n_iter=False)
 
+sklearn.linear_model.OrthogonalMatchingPursuitCV
+	(copy=True, fit_intercept=True, normalize=True, max_iter=None, cv=None, n_jobs=1, verbose=False)
 
+Approximates the optimal solution with forward feature selection by taregting:
+    fix number of non-zero elements (coefs)
+    a specific error
+Includes at each step the atom most highly correlated with the current residual. It is similar to the simpler matching pursuit (MP) method, but better in that at each iteration, the residual is recomputed using an orthogonal projection on the space of the previously chosen dictionary elements.
+"""
+from sklearn import linear_model
+reg = linear_model.OrthogonalMatchingPursuit() # score for 1: 0.75; for 2: 0.98, for 3: 1
+X, y = [[-1, 0, 2, -2], [0, 0, 3, 5], [1, 1, 4, -2],[-2,-3,1,1]], [-1, 0, -1,0]
+reg.fit(X, y)
+print(reg.coef_)
+reg.intercept_
+reg.predict(X)
+reg.score(X, y)
+
+reg = linear_model.OrthogonalMatchingPursuit(tol=0.1) # tol=0.1 -> 2 non-zero coefs
+X, y = [[-1, 0, 2, -2], [0, 0, 3, 5], [1, 1, 4, -2],[-2,-3,1,1]], [-1, 0, -1,0]
+reg.fit(X, y)
+print(reg.coef_)
+reg.intercept_
+reg.predict(X)
+reg.score(X, y)
+
+"""
+> 1.1.10. Bayesian Regression
+
+Estimates the regularization parameter from the data as a random variable:
+    The L_2 regularization used in Ridge Regression is equivalent to finding a maximum a posteriori estimation under a Gaussian prior over the parameters w with precision \lambda^{-1}. 
+
+The advantages of Bayesian Regression are:
+    It adapts to the data at hand.
+    It can be used to include regularization parameters in the estimation procedure.
+
+The disadvantages of Bayesian regression include:
+    Inference of the model can be time consuming.
+"""
+"""
+1.1.10.1. Bayesian Ridge Regression
+sklearn.linear_model.BayesianRidge
+	(n_iter=300, tol=0.001, alpha_1=1e-06, alpha_2=1e-06, lambda_1=1e-06, lambda_2=1e-06, compute_score=False, fit_intercept=True,
+	normalize=False, copy_X=True, verbose=False)
+"""
+from sklearn import linear_model
+X = [[0., 0.], [1., 1.], [2., 2.], [3., 3.]]
+y = [0., 1., 2., 3.]
+reg = linear_model.BayesianRidge()
+reg.fit(X, y)
+reg.coef_
+reg.predict(X)
+reg.score(X, y)
+
+# see example
+
+""" 
+1.1.10.2. Automatic Relevance Determination - ARD
+sklearn.linear_model.ARDRegression
+	(n_iter=300, tol=0.001, alpha_1=1e-06, alpha_2=1e-06, lambda_1=1e-06, lambda_2=1e-06, compute_score=False, threshold_lambda=10000.0,
+	 fit_intercept=True, normalize=False, copy_X=True, verbose=False)
+"""
 # <--------------------------------------------------------------------------------------------------------
 
 """
